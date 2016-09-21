@@ -1,0 +1,161 @@
+{% extends 'index.html' %}
+<link rel="stylesheet" type="text/css" href="/statics/DataTables/datatables.min.css"/>
+
+{% block page-heading %}
+        <!-- page heading start-->
+        <div class="page-heading">
+            <h3>
+                配置管理
+            </h3>
+            <ul class="breadcrumb">
+                <li>
+                    <a href="#">配置管理</a>
+                </li>
+                <li class="active">全部资产</li>
+            </ul>
+            <div class="state-info">
+                <section class="panel">
+                    <div class="panel-body">
+                        <div class="summary">
+                            <span>yearly expense</span>
+                            <h3 class="red-txt">$ 45,600</h3>
+                        </div>
+                        <div id="income" class="chart-bar"></div>
+                    </div>
+                </section>
+                <section class="panel">
+                    <div class="panel-body">
+                        <div class="summary">
+                            <span>yearly  income</span>
+                            <h3 class="green-txt">$ 45,600</h3>
+                        </div>
+                        <div id="expense" class="chart-bar"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    {% endblock %}
+{% block content %}
+
+
+<div class="panel">
+        <div class="panel-heading">
+            <h3 class="panel-title">所有资产</h3>
+        </div>
+        <div class="panel-body">
+            <table id="asset_list" class="display table  table-hover">
+              <thead >
+                    <tr class="btn-info">
+                        <th>资产ID</th>
+                        <th>资产类型</th>
+                        <th>Name</th>
+                        <th>SN</th>
+
+                        <th>IDC</th>
+                        <th>业务线</th>
+                        <th>管理IP</th>
+                        <th>制造商</th>
+                        <th>型号</th>
+                        <th>CPU型号</th>
+                        <th>CPU核数</th>
+                        <th>内存(GB)</th>
+                        <th>硬盘(GB)</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <footer></footer>
+            </table>
+
+
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}
+
+
+{% block  bottom-js %}
+<script type="text/javascript" src="/statics/DataTables/datatables.min.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready( function () {
+    <!--$("#container").removeClass("mainnav-lg");-->
+
+    var table = $('#asset_list').DataTable( {
+
+        initComplete: function () {
+            this.api().columns().every( function () {
+                var column = this;
+                var select = $('<select><option value=""></option></select>')
+                    .appendTo( $(column.footer()).empty() )
+                    .on( 'change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? '^'+val+'$' : '', true, false )
+                            .draw();
+                    } );
+
+                column.data().unique().sort().each( function ( d, j ) {
+                    select.append( '<option value="'+d+'">'+d+'</option>' )
+                } );
+            } );
+        },
+
+
+
+
+        "ajax": "{% url 'get_asset_list' %}",
+        "scrollX": true,
+        "pagingType": "full_numbers",
+         "stateSave": true,
+        "columns": [
+            { "data": "id" },
+            { "data": "asset_type" },
+            { "data": "name" },
+            { "data": "sn" },
+            { "data": "idc" },
+            { "data": "business_unit" },
+            { "data": "management_ip" },
+            { "data": "manufactory" },
+            { "data": "model" },
+            { "data": "cpu_model" },
+            { "data": "cpu_core_count" },
+            { "data": "ram_size" },
+            { "data": "disk_size" },
+            { "data": "status" },
+
+        ],
+      "columnDefs": [
+        {
+          targets: 0 ,//targets last column, use 0 for first column
+          className: 'btn-link pointer',
+         "data": "download_link",
+         "render": function ( data, type, full, meta ) {
+          return '<a class="btn-link" href="'+data+'" target="_blank">'+ data +'</a>';
+          }
+        }
+      ]
+
+
+    } ); //end datatables
+
+
+
+    $('#asset_list td:first-child').addClass("btn-info");
+    $('#asset_list').on('click', 'td:first-child', function () {
+        console.log($(this).text());
+    } );
+
+
+} );//end doc ready
+
+</script>
+
+{% endblock %}
